@@ -1,7 +1,5 @@
 package com.webssk.maven.plugins;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,21 +33,23 @@ public class TextToJavaMojo extends AbstractMojo {
 
         ExecutorService pool = Executors.newFixedThreadPool(2);
 
-        for (Path inputFile : TextToJava.findFiles(Paths.get(inputPath),
-                Paths.get(outputPath), pattern)) {
-            String inputName = inputFile.getFileName().toString();
-            Path outputFile = TextToJava.getOutputFile(inputFile,
-                    Paths.get(outputPath));
-            String outputName = outputFile.getFileName().toString();
-
-            getLog().info(inputName + " -> " + outputName);
-
-            TextToJava text = new TextToJava(inputFile, outputFile);
-            text.setPackageName(packageName);
-            text.setClassName(inputName.substring(0, inputName.indexOf('.')));
-
-            pool.execute(text);
-        }
+        // for (Path inputFile : TextToCode.findFiles(Paths.get(inputPath),
+        // Paths.get(outputPath), pattern)) {
+        // String inputName = inputFile.getFileName().toString();
+        // Path outputFile = TextToCode.getOutputFile(inputFile,
+        // Paths.get(outputPath));
+        // String outputName = outputFile.getFileName().toString();
+        //
+        // getLog().info(inputName + " -> " + outputName);
+        //
+        // TextToCode text = new TextToJava();
+        // text.setInputPath(inputFile);
+        // text.setOutputPath(outputFile);
+        // text.setPackageName(packageName);
+        // text.setClassName(inputName.substring(0, inputName.indexOf('.')));
+        //
+        // pool.execute(text);
+        // }
 
         pool.shutdown();
     }

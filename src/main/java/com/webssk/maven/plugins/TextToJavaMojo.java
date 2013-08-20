@@ -1,55 +1,53 @@
 package com.webssk.maven.plugins;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-@Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
-public class TextToJavaMojo extends AbstractMojo {
+@Mojo(name = "java", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+public class TextToJavaMojo extends TextToCodeMojo {
+
     @Parameter(alias = "package.name", defaultValue = "")
-    private String packageName;
-
-    @Parameter(alias = "input.path", defaultValue = ".")
-    private String inputPath;
-
-    @Parameter(alias = "output.path", defaultValue = ".")
-    private String outputPath;
-
-    @Parameter(defaultValue = "*.txt")
-    private String pattern;
+    protected String packageName;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info("package.name = " + packageName);
-        getLog().info("input.path = " + inputPath);
-        getLog().info("output.path = " + outputPath);
-        getLog().info("pattern = " + pattern);
+        super.execute();
+        if (!packageName.isEmpty()) {
+            getLog().info("package.name = " + packageName);
+        }
 
         ExecutorService pool = Executors.newFixedThreadPool(2);
 
-        // for (Path inputFile : TextToCode.findFiles(Paths.get(inputPath),
-        // Paths.get(outputPath), pattern)) {
-        // String inputName = inputFile.getFileName().toString();
-        // Path outputFile = TextToCode.getOutputFile(inputFile,
-        // Paths.get(outputPath));
-        // String outputName = outputFile.getFileName().toString();
-        //
-        // getLog().info(inputName + " -> " + outputName);
-        //
-        // TextToCode text = new TextToJava();
-        // text.setInputPath(inputFile);
-        // text.setOutputPath(outputFile);
-        // text.setPackageName(packageName);
-        // text.setClassName(inputName.substring(0, inputName.indexOf('.')));
-        //
-        // pool.execute(text);
-        // }
+        Map<Path, Path> files = NewFileVisitor.findFiles(Paths.get(inputPath),
+                Paths.get(outputPath), pattern, ".java");
+        for (Map.Entry<Path, Path> pair : files.entrySet()) {
+            String inputPath = pair.getKey().toString();
+            String outputPath = pair.getValue().toString();
+            String outputFile = pair.getValue().getFileName().toString();
+            String className = outputFile.substring(0, outputFile.indexOf('.'));
+
+            getLog().info(inputPath + " -> " + outputPath);
+
+            TextToCode text = new TextToJava();
+            TextToJavaProperties params = (TextToJavaProperties) text
+                    .getProperties();
+            params.setInputFile(inputPath);
+            params.setOutputFile(outputPath);
+            params.setPackageName(packageName);
+            params.setClassName(className);
+            params.setInputCharset(inputCharset);
+            params.setOutputCharset(outputCharset);
+            pool.execute(text);
+        }
 
         pool.shutdown();
     }

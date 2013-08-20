@@ -8,7 +8,20 @@ public class TextToCppProperties extends TextToCodeProperties {
         setProperty(VARIABLE_NAME, variableName);
     }
 
+    @Override
+    public String getExt() {
+        return ".cpp";
+    }
+
+    public String getVariableName() {
+        return getProperty(VARIABLE_NAME);
+    }
+
     public void setStdafxProlog(String stdafxProlog) {
         setProperty(STDAFX_PROLOG, stdafxProlog);
+    }
+
+    public String getStdafxProlog() {
+        return getProperty(STDAFX_PROLOG);
     }
 }

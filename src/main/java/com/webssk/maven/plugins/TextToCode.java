@@ -2,19 +2,18 @@ package com.webssk.maven.plugins;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class TextToCode implements Runnable {
     protected TextToCodeProperties params;
-    private StringBuffer script;
 
     public TextToCode() {
         try {
@@ -22,7 +21,6 @@ public abstract class TextToCode implements Runnable {
         } catch (InstantiationException | IllegalAccessException e) {
             this.params = new TextToCodeProperties();
         }
-        this.script = new StringBuffer(getScript());
     }
 
     protected Class<? extends TextToCodeProperties> getPropertiesClass() {
@@ -36,13 +34,6 @@ public abstract class TextToCode implements Runnable {
     public static void main(String[] args) throws InstantiationException,
             IllegalAccessException {
         TextToCpp.main(args);
-    }
-
-    protected Path getOutputFile(Path inputFile, Path outputPath) {
-        String inputName = inputFile.getFileName().toString();
-        String outputName = inputName.substring(0, inputName.indexOf('.'))
-                + getExt();
-        return Paths.get(outputPath.toString(), outputName);
     }
 
     protected String quoteString(String string) {
@@ -60,8 +51,9 @@ public abstract class TextToCode implements Runnable {
 
     protected StringBuffer getText() {
         StringBuffer text = new StringBuffer();
-        try (BufferedReader reader = new BufferedReader(new FileReader(
-                params.getInputFile()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(params.getInputFile()),
+                params.getInputCharset()))) {
             int lineNo = 0;
             while (true) {
                 String line = reader.readLine();
@@ -85,17 +77,15 @@ public abstract class TextToCode implements Runnable {
 
     protected abstract StringBuffer getScript();
 
-    protected abstract String getExt();
-
     @Override
     public void run() {
+        StringBuffer script = new StringBuffer(getScript());
         params.setTextString(getText().toString());
         Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
         Matcher matcher = pattern.matcher(script);
         int pos = 0;
         while (matcher.find(pos)) {
             String paramName = matcher.group(1);
-            System.out.println(paramName);
             if (params.containsKey(paramName)) {
                 script.replace(matcher.start(), matcher.end(),
                         params.getProperty(paramName));
@@ -105,8 +95,9 @@ public abstract class TextToCode implements Runnable {
             pos = matcher.start();
         }
 
-        try (Writer writer = new BufferedWriter(new FileWriter(
-                params.getOutputFile()))) {
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(params.getOutputFile()),
+                params.getOutputCharset()))) {
             writer.write(script.toString());
         } catch (FileNotFoundException e) {
             e.printStackTrace();

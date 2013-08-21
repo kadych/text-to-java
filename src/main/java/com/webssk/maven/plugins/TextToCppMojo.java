@@ -11,33 +11,38 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-@Mojo(name = "java", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
-public class TextToJavaMojo extends TextToCodeMojo {
+@Mojo(name = "cpp", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
+public class TextToCppMojo extends TextToCodeMojo {
 
-    @Parameter(alias = TextToJavaProperties.PACKAGE_NAME, defaultValue = "")
-    protected String packageName;
+    @Parameter(alias = TextToCppProperties.STDAFX_PROLOG, defaultValue = "")
+    protected String stdafxProlog;
+
+    @Parameter(alias = TextToCppProperties.UTF8_BOM, defaultValue = "")
+    protected String utf8Bom;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         ExecutorService pool = Executors.newFixedThreadPool(2);
 
-        for (Map.Entry<Path, Path> pair : findFiles(".java").entrySet()) {
+        for (Map.Entry<Path, Path> pair : findFiles(".cpp").entrySet()) {
             String inputPath = pair.getKey().toString();
             String outputPath = pair.getValue().toString();
             String outputFile = pair.getValue().getFileName().toString();
-            String className = outputFile.substring(0, outputFile.indexOf('.'));
+            String variableName = outputFile.substring(0,
+                    outputFile.indexOf('.'));
 
             getLog().info(inputPath + " -> " + outputPath);
 
-            TextToCode text = new TextToJava();
-            TextToJavaProperties params = (TextToJavaProperties) text
+            TextToCode text = new TextToCpp();
+            TextToCppProperties params = (TextToCppProperties) text
                     .getProperties();
             params.setInputFile(inputPath);
             params.setOutputFile(outputPath);
-            params.setPackageName(packageName);
-            params.setClassName(className);
             params.setInputCharset(inputCharset);
             params.setOutputCharset(outputCharset);
+            params.setVariableName(variableName);
+            params.setStdafxProlog(stdafxProlog);
+            params.setUtf8Bom(utf8Bom);
             pool.execute(text);
         }
 

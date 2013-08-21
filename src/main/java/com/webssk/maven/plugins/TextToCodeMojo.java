@@ -1,11 +1,13 @@
 package com.webssk.maven.plugins;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 
-public class TextToCodeMojo extends AbstractMojo {
+public abstract class TextToCodeMojo extends AbstractMojo {
 
     @Parameter(alias = "input.path", defaultValue = ".")
     protected String inputPath;
@@ -16,16 +18,14 @@ public class TextToCodeMojo extends AbstractMojo {
     @Parameter(defaultValue = "*.txt")
     protected String pattern;
 
-    @Parameter(alias = "input.charset")
+    @Parameter(alias = TextToCodeProperties.INPUT_CHARSET)
     protected String inputCharset;
 
-    @Parameter(alias = "output.charset")
+    @Parameter(alias = TextToCodeProperties.OUTPUT_CHARSET)
     protected String outputCharset;
 
-    @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        getLog().info("input.path = " + inputPath);
-        getLog().info("output.path = " + outputPath);
-        getLog().info("pattern = " + pattern);
+    public Map<Path, Path> findFiles(String ext) {
+        return NewFileVisitor.findFiles(Paths.get(inputPath),
+                Paths.get(outputPath), pattern, ext);
     }
 }

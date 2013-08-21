@@ -9,11 +9,7 @@ public class TextToCodeProperties {
     public static final String INPUT_CHARSET = "input.charset";
     public static final String OUTPUT_CHARSET = "output.charset";
     private static final String DEFAULT_CHARSET = "ISO-8859-1";
-    private final Properties params;
-
-    public TextToCodeProperties() {
-        this.params = new Properties();
-    }
+    private final Properties params = new Properties();
 
     public String getExt() {
         return ".txt";

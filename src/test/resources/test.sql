@@ -1,4 +1,4 @@
--- Получить список изданий
+-- РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РёР·РґР°РЅРёР№
 select t.*
   from zx.issues t
- where t.code in (1, 9);
+ where t.code in (1, 9) and t.isactive = 'Y';

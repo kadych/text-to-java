@@ -13,7 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class TextToCode implements Runnable {
-    protected TextToCodeProperties params;
+
+    private TextToCodeProperties params;
 
     public TextToCode() {
         try {

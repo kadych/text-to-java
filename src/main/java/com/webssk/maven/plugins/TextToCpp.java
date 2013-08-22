@@ -4,7 +4,7 @@ public class TextToCpp extends TextToCode {
 
     @Override
     protected StringBuffer getScript() {
-        TextToCppProperties cppParams = (TextToCppProperties) params;
+        TextToCppProperties cppParams = (TextToCppProperties) getProperties();
         StringBuffer sb = new StringBuffer();
         if (!cppParams.getUtf8Bom().isEmpty()) {
             sb.append("\uFEFF");
